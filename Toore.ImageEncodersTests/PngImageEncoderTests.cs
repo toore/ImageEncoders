@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Toore.ImageEncoders;
 using Toore.ImageEncoders.Core;
 using Toore.ImageEncoders.Png;
 using Xunit;

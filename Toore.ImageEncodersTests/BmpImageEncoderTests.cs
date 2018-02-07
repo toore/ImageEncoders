@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
-using Toore.ImageEncoders;
 using Toore.ImageEncoders.Bmp;
 using Toore.ImageEncoders.Core;
 using Xunit;
@@ -32,7 +31,7 @@ namespace Toore.ImageEncodersTests
         [Fact]
         public void Asserts_bmp_header_file_size()
         {
-            var bitmap = _sut.Encode(new RgbBitmap(new List<IRgbColor>(new IRgbColor[512]), 128, 4));
+            var bitmap = _sut.Encode(new RgbBitmap(CreateRgbColors(512), 128, 4));
 
             // 54 + 512*3 = 1590 = 0x0636
             bitmap.SubBuffer(2, Dword32Bit).ShouldBeEquivalentTo(new byte[] { 0x36, 0x06, 0x00, 0x00 });
@@ -41,7 +40,7 @@ namespace Toore.ImageEncodersTests
         [Fact]
         public void Asserts_width()
         {
-            var bitmap = _sut.Encode(new RgbBitmap(new List<IRgbColor>(new IRgbColor[256]), 256, 1));
+            var bitmap = _sut.Encode(new RgbBitmap(CreateRgbColors(256), 256, 1));
 
             bitmap.SubBuffer(18, Dword32Bit).ShouldBeEquivalentTo(new byte[] { 0, 1, 0, 0 });
         }
@@ -49,7 +48,7 @@ namespace Toore.ImageEncodersTests
         [Fact]
         public void Asserts_height()
         {
-            var bitmap = _sut.Encode(new RgbBitmap(new List<IRgbColor>(new IRgbColor[65536]), 1, 65536));
+            var bitmap = _sut.Encode(new RgbBitmap(CreateRgbColors(65536), 1, 65536));
 
             bitmap.SubBuffer(22, Dword32Bit).ShouldBeEquivalentTo(new byte[] { 0, 0, 1, 0 });
         }
@@ -96,6 +95,13 @@ namespace Toore.ImageEncodersTests
             Action act = () => _sut.Encode(new RgbBitmap(new List<IRgbColor>(new IRgbColor[0]), 1, 0));
 
             act.ShouldThrow<ArgumentOutOfRangeException>();
+        }
+
+        private static List<IRgbColor> CreateRgbColors(int size)
+        {
+            return Enumerable.Repeat(new RgbColor(), size)
+                .Cast<IRgbColor>()
+                .ToList();
         }
     }
 
