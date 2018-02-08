@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Toore.ImageEncoders.Core;
 
@@ -18,10 +19,10 @@ namespace Toore.ImageEncoders.Bmp
             const int bitsPerPixel = 24;
             var pixelArray = GetPixelArray(bitmap, bitsPerPixel);
             var rawBitmapDataSize = (uint)pixelArray.Length;
-            var dibHeader = GetDibHeader(rawBitmapDataSize, (uint)bitmap.Width, (uint)bitmap.Height, bitsPerPixel);
+            var dibHeader = GetDibHeader(rawBitmapDataSize, (uint)bitmap.Width, (uint)bitmap.Height, bitsPerPixel).ToList();
 
             const int bitmapHeaderSize = 14;
-            var bmpFileSize = (uint)(rawBitmapDataSize + dibHeader.Length + bitmapHeaderSize);
+            var bmpFileSize = (uint)(rawBitmapDataSize + dibHeader.Count + bitmapHeaderSize);
             var bmpHeader = GetBmpHeader(bmpFileSize);
 
             var bmpImage = bmpHeader
@@ -52,63 +53,56 @@ namespace Toore.ImageEncoders.Bmp
             return pixelArray;
         }
 
-        private static byte[] GetBmpHeader(UInt32 bmpFileSize)
+        private static IEnumerable<byte> GetBmpHeader(UInt32 bmpFileSize)
         {
-            byte[] bmpHeader =
-                {
-                    0x42, 0x4D, // "BM"
-                    0x00, 0x00, 0x00, 0x00, // Size of the bmp file
-                    0x00, 0x00, // Unused
-                    0x00, 0x00, // Unused
-                    0x36, 0x00, 0x00, 0x00, // Offset where the pixel array (bitmap data) can be found
-                };
+            const byte B = 0x42;
+            const byte M = 0x4D;
+            var bmpIdentifier = new[] { B, M };
+            var unusedBytes = new byte[4];
+            var pixelArrayOffset = GetUIntLsb(54);
 
-            bmpHeader[2] = (byte)bmpFileSize;
-            bmpHeader[3] = (byte)(bmpFileSize >> 8);
-            bmpHeader[4] = (byte)(bmpFileSize >> 16);
-            bmpHeader[5] = (byte)(bmpFileSize >> 24);
-
-            return bmpHeader;
+            return bmpIdentifier
+                .Concat(GetUIntLsb(bmpFileSize))
+                .Concat(unusedBytes)
+                .Concat(pixelArrayOffset);
         }
 
-        private static byte[] GetDibHeader(UInt32 rawBitmapDataSize, uint width, uint height, int bitsPerPixel)
+        private static IEnumerable<byte> GetDibHeader(UInt32 rawBitmapDataSize, uint width, uint height, ushort numberOfBitsPerPixel)
         {
-            byte[] dibHeader =
-                {
-                    // DIB header
-                    0x28, 0x00, 0x00, 0x00, // Number of bytes in the DIB header (from this point)
-                    0x00, 0x00, 0x00, 0x00, // width
-                    0x00, 0x00, 0x00, 0x00, // height
-                    0x01, 0x00, // Number of color planes
-                    0x18, 0x00, // Number of bits per pixel
-                    0x00, 0x00, 0x00, 0x00, // BI_RGB, no pixel array compression used
-                    0x00, 0x00, 0x00, 0x00, // Size of the raw bitmap data (including padding)
-                    0x13, 0x0B, 0x00, 0x00, // Print resolution of the image,
-                    0x13, 0x0B, 0x00, 0x00, // 72 DPI × 39.3701 inches per meter yields 2834.6472
-                    0x00, 0x00, 0x00, 0x00, // Number of colors in the palette
-                    0x00, 0x00, 0x00, 0x00, // 0 means all colors are important
-                };
+            var dibHeaderSize = GetUIntLsb(40);
+            const ushort numberOfColorPlanes = 1;
+            var noPixelCompressionUsed = new byte[4];
+            const uint resolutionInPixelPerMeter = (uint)(72 * 39.3701);
+            const uint horizontalPrintResolution = resolutionInPixelPerMeter;
+            const uint verticalPrintResolution = resolutionInPixelPerMeter;
+            const uint numberOfColorsInThePalette = 0;
+            const uint allColorsAreImportant = 0;
 
-            WriteUInt(4, width);
-            WriteUInt(8, height);
-            WriteUShort(12, (ushort)bitsPerPixel);
-            WriteUInt(20, rawBitmapDataSize);
+            return dibHeaderSize
+                .Concat(GetUIntLsb(width))
+                .Concat(GetUIntLsb(height))
+                .Concat(GetUShortLsb(numberOfColorPlanes))
+                .Concat(GetUShortLsb(numberOfBitsPerPixel))
+                .Concat(noPixelCompressionUsed)
+                .Concat(GetUIntLsb(rawBitmapDataSize))
+                .Concat(GetUIntLsb(horizontalPrintResolution))
+                .Concat(GetUIntLsb(verticalPrintResolution))
+                .Concat(GetUIntLsb(numberOfColorsInThePalette))
+                .Concat(GetUIntLsb(allColorsAreImportant));
+        }
 
-            return dibHeader;
+        private static IEnumerable<byte> GetUIntLsb(uint value)
+        {
+            yield return (byte)value;
+            yield return (byte)(value >> 8);
+            yield return (byte)(value >> 16);
+            yield return (byte)(value >> 24);
+        }
 
-            void WriteUInt(int index, uint value)
-            {
-                dibHeader[index] = (byte)value;
-                dibHeader[index + 1] = (byte)(value >> 8);
-                dibHeader[index + 2] = (byte)(value >> 16);
-                dibHeader[index + 3] = (byte)(value >> 24);
-            }
-
-            void WriteUShort(int index, ushort value)
-            {
-                dibHeader[index] = (byte)value;
-                dibHeader[index + 1] = (byte)(value >> 8);
-            }
+        private static IEnumerable<byte> GetUShortLsb(ushort value)
+        {
+            yield return (byte)value;
+            yield return (byte)(value >> 8);
         }
     }
 }

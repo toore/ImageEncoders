@@ -13,6 +13,7 @@ namespace Toore.ImageEncodersTests
     {
         private readonly BmpImageEncoder _sut;
         private const int Dword32Bit = 4;
+        private readonly List<IRgbColor> _emptyImageData = new List<IRgbColor>(new IRgbColor[0]);
 
         public BmpImageEncoderTests()
         {
@@ -67,7 +68,7 @@ namespace Toore.ImageEncodersTests
                     new RgbColor(0, 0, 255),
                     new RgbColor(0, 255, 0),
                     new RgbColor(255, 0, 0),
-                    new RgbColor(255, 255, 255),
+                    new RgbColor(255, 255, 255)
                 };
 
             var bitmap = _sut.Encode(new RgbBitmap(pixels, 2, 2));
@@ -84,7 +85,7 @@ namespace Toore.ImageEncodersTests
         [Fact]
         public void Width_can_not_be_less_than_1()
         {
-            Action act = () => _sut.Encode(new RgbBitmap(new List<IRgbColor>(new IRgbColor[0]), 0, 1));
+            Action act = () => _sut.Encode(new RgbBitmap(_emptyImageData, 0, 1));
 
             act.ShouldThrow<ArgumentOutOfRangeException>();
         }
@@ -92,7 +93,7 @@ namespace Toore.ImageEncodersTests
         [Fact]
         public void Height_can_not_be_less_than_1()
         {
-            Action act = () => _sut.Encode(new RgbBitmap(new List<IRgbColor>(new IRgbColor[0]), 1, 0));
+            Action act = () => _sut.Encode(new RgbBitmap(_emptyImageData, 1, 0));
 
             act.ShouldThrow<ArgumentOutOfRangeException>();
         }
