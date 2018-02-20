@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using FluentAssertions;
 using Toore.ImageEncoders.Bmp;
@@ -72,7 +71,6 @@ namespace Toore.ImageEncodersTests
                 };
 
             var bitmap = _sut.Encode(new RgbBitmap(pixels, 2, 2));
-            File.WriteAllBytes("test.bmp", bitmap.ToArray());
 
             bitmap.SubBuffer(54, rgbSize).ShouldBeEquivalentTo(red);
             bitmap.SubBuffer(57, rgbSize).ShouldBeEquivalentTo(white);
