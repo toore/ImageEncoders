@@ -49,8 +49,8 @@ namespace Toore.ImageEncoders.Png
 
         private IEnumerable<byte> GetIHDRChunk(IRgbBitmap bitmap)
         {
-            var chunkData = GetWidthBytes(bitmap)
-                .Concat(GetHeightBytes(bitmap))
+            var chunkData = GetUIntMsb((uint)bitmap.Width)
+                .Concat(GetUIntMsb((uint)bitmap.Height))
                 .Concat(new[]
                     {
                         (byte)BitDepth.BitsPerSampleIs8,
@@ -66,7 +66,7 @@ namespace Toore.ImageEncoders.Png
 
         private IEnumerable<byte> GetIDATChunk(IRgbBitmap bitmap)
         {
-            var imageData = bitmap.Image
+            var imageData = bitmap.Pixels
                 .Chunk(bitmap.Width)
                 .Select(EncodeScanLine)
                 .Select(FilterImageData)
@@ -81,16 +81,6 @@ namespace Toore.ImageEncoders.Png
         private IEnumerable<byte> GetIENDChunk()
         {
             return CreateChunk(ChunkType.IEND, new byte[0]);
-        }
-
-        private static IEnumerable<byte> GetWidthBytes(IRgbBitmap bitmap)
-        {
-            return GetUIntMsb((uint)bitmap.Width);
-        }
-
-        private static IEnumerable<byte> GetHeightBytes(IRgbBitmap bitmap)
-        {
-            return GetUIntMsb((uint)bitmap.Height);
         }
 
         private static IEnumerable<byte> EncodeScanLine(IEnumerable<IRgbColor> colors)
@@ -109,8 +99,9 @@ namespace Toore.ImageEncoders.Png
             var compressedImageData = DeflateCompress(imageData);
 
             const byte deflateCompression = 8;
-            const byte checkHeaderBits = 31 - deflateCompression * 256 % 31;
-            const byte flags = checkHeaderBits;
+            const byte compressionLevel = (byte)PngCompressionLevel.Default << 6;
+            const byte checkHeaderBits = 31 - (deflateCompression * 256 + compressionLevel) % 31;
+            const byte flags = checkHeaderBits | compressionLevel;
 
             return new[] { deflateCompression, flags }
                 .Concat(compressedImageData)
@@ -213,6 +204,11 @@ namespace Toore.ImageEncoders.Png
     internal enum FilterType
     {
         None = 0
+    }
+
+    internal enum PngCompressionLevel
+    {
+        Default = 2
     }
 
     internal class ChunkType

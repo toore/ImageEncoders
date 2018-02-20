@@ -9,7 +9,7 @@ namespace Toore.ImageEncoders.Core
     {
         /// <summary>The image is a rectangular pixel array, with pixels appearing left-to-right within each row, and rows appearing top-to-bottom.</summary>
         /// <returns>An array of pixels.</returns>
-        IEnumerable<IRgbColor> Image { get; }
+        IEnumerable<IRgbColor> Pixels { get; }
 
         /// <summary>Gets the width of the bitmap.</summary>
         /// <returns>The width of the bitmap.</returns>

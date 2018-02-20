@@ -36,7 +36,7 @@ namespace Toore.ImageEncoders.Bmp
         private static byte[] GetPixelArray(IRgbBitmap bitmap, int bitsPerPixel)
         {
             var sourceRowSize = bitmap.Width * 3;
-            var sourcePixelData = bitmap.Image.ToRgbEncodedBytes().ToArray();
+            var sourcePixelData = bitmap.Pixels.ToRgbEncodedBytes().ToArray();
 
             var destinationRowSize = (bitsPerPixel * bitmap.Width + 31) / 32 * 4;
             var pixelArraySize = destinationRowSize * bitmap.Height;

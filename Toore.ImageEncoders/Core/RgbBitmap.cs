@@ -39,11 +39,11 @@ namespace Toore.ImageEncoders.Core
     /// </summary>
     public class RgbBitmap : IRgbBitmap
     {
-        private readonly IList<IRgbColor> _image;
+        private readonly IList<IRgbColor> _pixels;
 
         /// <summary>The image is a rectangular pixel array, with pixels appearing left-to-right within each row, and rows appearing top-to-bottom.</summary>
         /// <returns>An array of pixels.</returns>
-        public IEnumerable<IRgbColor> Image => _image;
+        public IEnumerable<IRgbColor> Pixels => _pixels;
 
         /// <summary>Gets the width of the bitmap.</summary>
         /// <returns>The width of the bitmap.</returns>
@@ -56,10 +56,10 @@ namespace Toore.ImageEncoders.Core
         /// <summary>
         /// Initializes a new instance of the <see cref="RgbBitmap" /> class with pixels, width and height.
         /// </summary>
-        /// <param name="image">The image is a rectangular pixel array, with pixels appearing left-to-right within each row, and rows appearing top-to-bottom.</param>
+        /// <param name="pixels">The pixels is a rectangular pixel array, with pixels appearing left-to-right within each row, and rows appearing top-to-bottom.</param>
         /// <param name="width">The width of the bitmap.</param>
         /// <param name="height">The height of the bitmap.</param>
-        public RgbBitmap(IList<IRgbColor> image, int width, int height)
+        public RgbBitmap(IList<IRgbColor> pixels, int width, int height)
         {
             if (width < 1)
             {
@@ -71,12 +71,12 @@ namespace Toore.ImageEncoders.Core
                 throw new ArgumentOutOfRangeException($"{nameof(height)}", height, "Parameter must be greater than zero.");
             }
 
-            if (image.Count != width * height)
+            if (pixels.Count != width * height)
             {
-                throw new InvalidOperationException("Actual image size does not correspond to desired image size");
+                throw new InvalidOperationException("Actual pixel array size does not correspond to desired pixels size");
             }
 
-            _image = image;
+            _pixels = pixels;
             Width = width;
             Height = height;
         }
