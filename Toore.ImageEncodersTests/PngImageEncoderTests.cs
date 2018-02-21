@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using FluentAssertions;
 using Toore.ImageEncoders.Core;
@@ -34,22 +33,6 @@ namespace Toore.ImageEncodersTests
                     .Should()
                     .BeEquivalentTo(pngMandatoryFileSignature);
             }
-
-            [Fact]
-            public void Generates_test_image()
-            {
-                var pixels = new List<IRgbColor>
-                    {
-                        new RgbColor(0, 0, 255),
-                        new RgbColor(0, 255, 0),
-                        new RgbColor(255, 0, 0),
-                        new RgbColor(255, 255, 255),
-                    };
-
-                var bitmap = _sut.Encode(new RgbBitmap(pixels, 2, 2));
-
-                File.WriteAllBytes("test.png", bitmap.ToArray());
-            }
         }
 
         public class IHDRChunk : PngImageEncoderTests
@@ -61,8 +44,6 @@ namespace Toore.ImageEncodersTests
             private const int ColorTypeLength = 1;
             private const int CompressionMethodLength = 1;
             private const int FilterMethodLength = 1;
-            private const int ÍnterlaceMethodLength = 1;
-
 
             [Fact]
             public void Chunk_exists()
