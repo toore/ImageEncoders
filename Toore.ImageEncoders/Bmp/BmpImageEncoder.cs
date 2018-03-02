@@ -12,7 +12,7 @@ namespace Toore.ImageEncoders.Bmp
         /// </summary>
         /// <param name="bitmap">A RGB bitmap.</param>
         /// <returns>A bitmap image file</returns>
-        public byte[] Encode(IRgbBitmap bitmap)
+        public IEnumerable<byte> Encode(IRgbBitmap bitmap)
         {
             // https://en.wikipedia.org/wiki/BMP_file_format
 
@@ -25,12 +25,9 @@ namespace Toore.ImageEncoders.Bmp
             var bmpFileSize = (uint)(rawBitmapDataSize + dibHeader.Count + bitmapHeaderSize);
             var bmpHeader = GetBmpHeader(bmpFileSize);
 
-            var bmpImage = bmpHeader
+            return bmpHeader
                 .Concat(dibHeader)
-                .Concat(pixelArray)
-                .ToArray();
-
-            return bmpImage;
+                .Concat(pixelArray);
         }
 
         private static byte[] GetPixelArray(IRgbBitmap bitmap, int bitsPerPixel)

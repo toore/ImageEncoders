@@ -22,7 +22,7 @@ namespace Toore.ImageEncodersTests
         [Fact]
         public void Asserts_bmp_header_identifier()
         {
-            var bitmap = _sut.Encode(new RgbBitmap(new List<IRgbColor> { new RgbColor() }, 1, 1));
+            var bitmap = _sut.Encode(new RgbBitmap(new List<IRgbColor> { new RgbColor() }, 1, 1)).ToArray();
 
             bitmap[0].Should().Be((byte)'B');
             bitmap[1].Should().Be((byte)'M');
@@ -31,7 +31,7 @@ namespace Toore.ImageEncodersTests
         [Fact]
         public void Asserts_bmp_header_file_size()
         {
-            var bitmap = _sut.Encode(new RgbBitmap(CreateRgbColors(512), 128, 4));
+            var bitmap = _sut.Encode(new RgbBitmap(CreateRgbColors(512), 128, 4)).ToArray();
 
             // 54 + 512*3 = 1590 = 0x0636
             bitmap.SubBuffer(2, Dword32Bit).ShouldBeEquivalentTo(new byte[] { 0x36, 0x06, 0x00, 0x00 });
@@ -40,7 +40,7 @@ namespace Toore.ImageEncodersTests
         [Fact]
         public void Asserts_width()
         {
-            var bitmap = _sut.Encode(new RgbBitmap(CreateRgbColors(256), 256, 1));
+            var bitmap = _sut.Encode(new RgbBitmap(CreateRgbColors(256), 256, 1)).ToArray();
 
             bitmap.SubBuffer(18, Dword32Bit).ShouldBeEquivalentTo(new byte[] { 0, 1, 0, 0 });
         }
@@ -48,7 +48,7 @@ namespace Toore.ImageEncodersTests
         [Fact]
         public void Asserts_height()
         {
-            var bitmap = _sut.Encode(new RgbBitmap(CreateRgbColors(65536), 1, 65536));
+            var bitmap = _sut.Encode(new RgbBitmap(CreateRgbColors(65536), 1, 65536)).ToArray();
 
             bitmap.SubBuffer(22, Dword32Bit).ShouldBeEquivalentTo(new byte[] { 0, 0, 1, 0 });
         }
@@ -70,7 +70,7 @@ namespace Toore.ImageEncodersTests
                     new RgbColor(255, 255, 255)
                 };
 
-            var bitmap = _sut.Encode(new RgbBitmap(pixels, 2, 2));
+            var bitmap = _sut.Encode(new RgbBitmap(pixels, 2, 2)).ToArray();
 
             bitmap.SubBuffer(54, rgbSize).ShouldBeEquivalentTo(red);
             bitmap.SubBuffer(57, rgbSize).ShouldBeEquivalentTo(white);
